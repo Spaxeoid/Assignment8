@@ -2,6 +2,9 @@ package cs2321;
 
 import java.io.*;
 import java.util.Scanner;
+
+import cs2321.HeapPQ.PQEntry;
+
 import java.util.Iterator;
 import net.datastructures.*;
 
@@ -132,12 +135,11 @@ public class Labyrinth {
 	 * 				NO path, do NOT return null. Return an empty sequence. 
 	 */
 	public Iterable<Edge<Walkway>> dfsPath(RoomCoordinate start, RoomCoordinate end) {
-		// #TODO: Complete and correct dfsPath()
-		/* #TODO: TCJ */
 		HashMap<Vertex<RoomCoordinate>, Boolean> visited = new HashMap<>((int) (mGraph.numVertices() * 1.2)); 
 		HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest = new HashMap<>((int) (mGraph.numVertices() * 1.2));
 		Vertex<RoomCoordinate> v = null;
 		Vertex<RoomCoordinate> z = null;
+		// Convert RoomCoordinates to Vertex<RoomCoordinate> for both start and end 
 		for(Vertex<RoomCoordinate> e: mGraph.vertices()) {
 			Vertex<RoomCoordinate> temp = e;
 			if(temp.getElement().equals(start)) {
@@ -152,11 +154,13 @@ public class Labyrinth {
 	}
 
 	public boolean DFSPath(Vertex<RoomCoordinate> v, Vertex<RoomCoordinate> z, HashMap<Vertex<RoomCoordinate>, Boolean> visited, HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest) {
+		// if both vertexes sent to the function are the same, return true
 		if( v == z) {
 			return true;
 		}else {
 			visited.put(v, true);
 			Edge<Walkway>[] edge = new Edge[4];
+			// Searches North then East then South then West
 			for(Edge<Walkway> e: mGraph.outgoingEdges(v)) {
 				if(mGraph.opposite(v, e).getElement().getY() < v.getElement().getY()) {
 					edge[0] = e;
@@ -168,6 +172,7 @@ public class Labyrinth {
 					edge[3] = e;
 				}
 			}
+			// Depth First search algorithm using the four edges from the previous loop
 			for(int i = 0; i < 4; i++) {
 				if(edge[i] != null) {
 					Vertex<RoomCoordinate> w = mGraph.opposite(v, edge[i]);
@@ -216,6 +221,7 @@ public class Labyrinth {
 		HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest = new HashMap<>((int) (mGraph.numVertices() * 1.2));
 		Vertex<RoomCoordinate> v = null;
 		Vertex<RoomCoordinate> z = null;
+		// Convert RoomCoordinates start and end to vertexes 
 		for(Vertex<RoomCoordinate> e: mGraph.vertices()) {
 			Vertex<RoomCoordinate> temp = e;
 			if(temp.getElement().equals(start)) {
@@ -286,14 +292,56 @@ public class Labyrinth {
 	 * 				NO path, do NOT return null. Return an empty sequence. 
 	 */
 	public Iterable<Edge<Walkway>> shortestPath(RoomCoordinate start, RoomCoordinate end) {
-		// #TODO: Complete and correct shortestPath()
-		/* #TODO: TCJ */
 		HashMap<Vertex<RoomCoordinate>, Integer> d = new HashMap<>();
 		HeapPQ<Integer, Vertex<RoomCoordinate>> pq = new HeapPQ<>();
+		HashMap<Vertex<RoomCoordinate>, Entry<Integer, Vertex<RoomCoordinate>>> PQTokens = new HashMap<>();
+		HashMap<Vertex<RoomCoordinate>, Integer> cloud = new HashMap<>();
+		HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest = new HashMap<>();
+		Vertex<RoomCoordinate> v = null;
+		Vertex<RoomCoordinate> z = null;
+		for(Vertex<RoomCoordinate> e: mGraph.vertices()) {
+			Vertex<RoomCoordinate> temp = e;
+			if(temp.getElement().equals(start)) {
+				v = temp;
+			}
+			if(temp.getElement().equals(end)) {
+				z = temp;
+			}
+		}
 		
-		return null;
+		for(Vertex<RoomCoordinate> u: mGraph.vertices()) {
+			if(u == v) {
+				d.put(u, 0);
+			}else {
+				d.put(u, Integer.MAX_VALUE);
+			}
+			PQTokens.put(u, pq.insert(d.get(u), u));
+		}
+		while(!pq.isEmpty()) {
+			Entry<Integer, Vertex<RoomCoordinate>> entry = pq.removeMin();
+			int key = entry.getKey();
+			Vertex<RoomCoordinate> u = entry.getValue();
+			if(u == z) {
+				break;
+			}
+			cloud.put(u, key);
+			PQTokens.remove(u);
+			for(Edge<Walkway> e: mGraph.outgoingEdges(u)) {
+				Vertex<RoomCoordinate> w = mGraph.opposite(u, e);
+				if(cloud.get(w) == null) {
+					int newDistance = d.get(u) + e.getElement().getDistance();
+					if(d.get(w) > newDistance) {
+						d.put(w, newDistance);
+						forest.put(w, e);
+						pq.replaceKey(PQTokens.get(v), newDistance);
+					}
+				}
+			}
+		}
+		
+		return constructPath(v, z, forest);
 	}
-
+	
 	/*
 	 * Complete the totalPathDistance function, which calculates how far the
 	 * given path traverses.
