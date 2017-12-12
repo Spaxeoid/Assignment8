@@ -134,7 +134,50 @@ public class Labyrinth {
 	public Iterable<Edge<Walkway>> dfsPath(RoomCoordinate start, RoomCoordinate end) {
 		// #TODO: Complete and correct dfsPath()
 		/* #TODO: TCJ */
-		return null;
+		HashMap<Vertex<RoomCoordinate>, Boolean> visited = new HashMap<>((int) (mGraph.numVertices() * 1.2)); 
+		HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest = new HashMap<>((int) (mGraph.numVertices() * 1.2));
+		Vertex<RoomCoordinate> v = null;
+		Vertex<RoomCoordinate> z = null;
+		for(Vertex<RoomCoordinate> e: mGraph.vertices()) {
+			Vertex<RoomCoordinate> temp = e;
+			if(temp.getElement().equals(start)) {
+				v = temp;
+			}else if(temp.getElement().equals(end)) {
+				 z = temp;
+			}
+		}
+		DFSPath(v, z, visited, forest);
+		return constructPath(v, z, forest);
+	}
+	
+	public boolean DFSPath(Vertex<RoomCoordinate> v, Vertex<RoomCoordinate> z, HashMap<Vertex<RoomCoordinate>, Boolean> visited, HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest) {
+		if( v == z) {
+			return true;
+		}else {
+			visited.put(v, true);
+			for(Edge<Walkway> e: mGraph.outgoingEdges(v)) {
+				Vertex<RoomCoordinate> w = mGraph.opposite(v, e);
+				if(visited.get(w) == null) {
+					forest.put(w, e);
+					boolean found = DFSPath(w, z, visited, forest);
+					if(found == true) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	public Iterable<Edge<Walkway>> constructPath(Vertex<RoomCoordinate> u, Vertex<RoomCoordinate> v, HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest){
+		Vertex<RoomCoordinate> end = v;
+		DoublyLinkedList<Edge<Walkway>> temp = new DoublyLinkedList<>();
+		while(end != u) {
+			Edge<Walkway> E = forest.get(end);
+			temp.addFirst(E);
+			end = mGraph.opposite(end, E);
+		}
+		return temp;
 	}
 
 
