@@ -142,33 +142,49 @@ public class Labyrinth {
 			Vertex<RoomCoordinate> temp = e;
 			if(temp.getElement().equals(start)) {
 				v = temp;
-			}else if(temp.getElement().equals(end)) {
-				 z = temp;
+			}
+			if(temp.getElement().equals(end)) {
+				z = temp;
 			}
 		}
 		DFSPath(v, z, visited, forest);
 		return constructPath(v, z, forest);
 	}
-	
+
 	public boolean DFSPath(Vertex<RoomCoordinate> v, Vertex<RoomCoordinate> z, HashMap<Vertex<RoomCoordinate>, Boolean> visited, HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest) {
 		if( v == z) {
 			return true;
 		}else {
 			visited.put(v, true);
+			Edge<Walkway>[] edge = new Edge[4];
 			for(Edge<Walkway> e: mGraph.outgoingEdges(v)) {
-				Vertex<RoomCoordinate> w = mGraph.opposite(v, e);
-				if(visited.get(w) == null) {
-					forest.put(w, e);
-					boolean found = DFSPath(w, z, visited, forest);
-					if(found == true) {
-						return true;
+				if(mGraph.opposite(v, e).getElement().getY() < v.getElement().getY()) {
+					edge[0] = e;
+				}else if(mGraph.opposite(v, e).getElement().getX() > v.getElement().getX()) {
+					edge[1] = e;
+				}else if(mGraph.opposite(v, e).getElement().getY() > v.getElement().getY()) {
+					edge[2] = e;
+				}else if(mGraph.opposite(v, e).getElement().getX() < v.getElement().getX()) {
+					edge[3] = e;
+				}
+			}
+			for(int i = 0; i < 4; i++) {
+				if(edge[i] != null) {
+					Vertex<RoomCoordinate> w = mGraph.opposite(v, edge[i]);
+					if(visited.get(w) == null) {
+						forest.put(w, edge[i]);
+						boolean found = DFSPath(w, z, visited, forest);
+						if(found == true) {
+							return true;
+						}
 					}
 				}
+
 			}
 		}
 		return false;
 	}
-	
+
 	public Iterable<Edge<Walkway>> constructPath(Vertex<RoomCoordinate> u, Vertex<RoomCoordinate> v, HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest){
 		Vertex<RoomCoordinate> end = v;
 		DoublyLinkedList<Edge<Walkway>> temp = new DoublyLinkedList<>();
@@ -196,9 +212,66 @@ public class Labyrinth {
 	public Iterable<Edge<Walkway>> bfsPath(RoomCoordinate start, RoomCoordinate end) {
 		// #TODO: Complete and correct bfsPath()
 		/* #TODO: TCJ */
-		return null;
+		HashMap<Vertex<RoomCoordinate>, Boolean> visited = new HashMap<>((int) (mGraph.numVertices() * 1.2)); 
+		HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest = new HashMap<>((int) (mGraph.numVertices() * 1.2));
+		Vertex<RoomCoordinate> v = null;
+		Vertex<RoomCoordinate> z = null;
+		for(Vertex<RoomCoordinate> e: mGraph.vertices()) {
+			Vertex<RoomCoordinate> temp = e;
+			if(temp.getElement().equals(start)) {
+				v = temp;
+			}
+			if(temp.getElement().equals(end)) {
+				z = temp;
+			}
+		}
+		
+		return BFSPath(v, z, visited, forest);		
 	}
 
+	public Iterable<Edge<Walkway>> BFSPath(Vertex<RoomCoordinate> v, Vertex<RoomCoordinate> z, HashMap<Vertex<RoomCoordinate>, Boolean> visited, HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest) {
+		if(v == z) {
+			return null;
+		} else {
+			DoublyLinkedList<Vertex<RoomCoordinate>> queue = new DoublyLinkedList<>();
+			visited.put(v, true);
+			queue.addFirst(v);
+			Boolean found = false;
+			while(!queue.isEmpty()) {
+				Vertex<RoomCoordinate> u  = queue.removeLast();
+				Edge<Walkway>[] edge = new Edge[4];
+				for(Edge<Walkway> e: mGraph.outgoingEdges(u)) {
+					if(mGraph.opposite(u, e).getElement().getY() < u.getElement().getY()) {
+						edge[0] = e;
+					}else if(mGraph.opposite(u, e).getElement().getX() > u.getElement().getX()) {
+						edge[1] = e;
+					}else if(mGraph.opposite(u, e).getElement().getY() > u.getElement().getY()) {
+						edge[2] = e;
+					}else if(mGraph.opposite(u, e).getElement().getX() < u.getElement().getX()) {
+						edge[3] = e;
+					}
+				}
+				for(int i = 0; i < 4; i++) {
+					if(edge[i] != null) {
+						Vertex<RoomCoordinate> w = mGraph.opposite(u, edge[i]);
+						if(visited.get(w) == null) {
+							visited.put(w, true);
+							forest.put(w, edge[i]);
+							queue.addFirst(w);
+							if(w == z) {
+								found = true;
+								break;
+							}
+						}
+					}
+				}
+				if(found == true) {
+					break;
+				}
+			}
+		}
+		return constructPath(v, z, forest);
+	}
 
 	/**
 	 * Complete the shortestPath function by implementing Dijkstra's
@@ -215,6 +288,9 @@ public class Labyrinth {
 	public Iterable<Edge<Walkway>> shortestPath(RoomCoordinate start, RoomCoordinate end) {
 		// #TODO: Complete and correct shortestPath()
 		/* #TODO: TCJ */
+		HashMap<Vertex<RoomCoordinate>, Integer> d = new HashMap<>();
+		HeapPQ<Integer, Vertex<RoomCoordinate>> pq = new HeapPQ<>();
+		
 		return null;
 	}
 
@@ -224,7 +300,12 @@ public class Labyrinth {
 	 */
 	public static double totalPathDistance(Iterable<Edge<Walkway>> path) {
 		// # TODO: Complete totalPathDistance function
-		return 0;
+		int size = 0;
+		for(Edge<Walkway> e: path) {
+			size += e.getElement().getDistance();
+		}
+		
+		return size;
 	}
 
 	public static void main(String[] aArguments) {
