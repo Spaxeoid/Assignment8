@@ -90,7 +90,6 @@ public class ArrayList<E> implements List<E> {
 		for(int k = i; k < size - 1; k++) {
 			storage[k] = storage[k+1];
 		}
-		storage[size-1] = null;
 		size--;
 		return temp;
 	}
@@ -104,7 +103,6 @@ public class ArrayList<E> implements List<E> {
 	@TimeComplexity("O(n)")
 	public void addFirst(E e) throws IndexOutOfBoundsException {
 		add(0,e);
-		size++;
 	}
 	
 	@TimeComplexity("O(n)")
@@ -112,7 +110,7 @@ public class ArrayList<E> implements List<E> {
 		if(size == 0) {
 			add(0,e);
 		}else {
-		add(size-1, e);
+		add(size, e);
 		}
 	}
 		

@@ -26,7 +26,6 @@ public class Labyrinth {
 	public Labyrinth(String aFileName) {
 		mGraph = setupLabyrinth(aFileName);
 
-		// TODO: Add other necessary code to constructor
 	}
 
 	/*
@@ -123,17 +122,11 @@ public class Labyrinth {
 	}
 
 	/**
-	 * Complete the dfsPath function by implementing a Depth First Search
-	 * algorithm to find a path from start to end. At each vertex, the adjacent
-	 * edges shall be searched in the order of NORTH, EAST, SOURTH and WEST. 
-	 * @param start an RoomCoordinate object represents the start location, 
-	 * 				this object does not exist in the graph 
-	 * @param end  an RoomCoordinate object represents the start location, 
-	 * 				this object does not exist in the graph 
-	 * @return 		Return the sequence of edges traversed in order to get from the
-	 * 				start to the finish locations. If there is
-	 * 				NO path, do NOT return null. Return an empty sequence. 
+	 *  Finds a path from one point to another using a Depth-first algorithm
+	 *  TCJ: 
+	 *  Each vertex is visited once, each edge is scanned once
 	 */
+	@TimeComplexity("O(n + m)")
 	public Iterable<Edge<Walkway>> dfsPath(RoomCoordinate start, RoomCoordinate end) {
 		HashMap<Vertex<RoomCoordinate>, Boolean> visited = new HashMap<>((int) (mGraph.numVertices() * 1.2)); 
 		HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest = new HashMap<>((int) (mGraph.numVertices() * 1.2));
@@ -153,6 +146,7 @@ public class Labyrinth {
 		return constructPath(v, z, forest);
 	}
 
+	@TimeComplexity("O(n + m)")
 	public boolean DFSPath(Vertex<RoomCoordinate> v, Vertex<RoomCoordinate> z, HashMap<Vertex<RoomCoordinate>, Boolean> visited, HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest) {
 		// if both vertexes sent to the function are the same, return true
 		if( v == z) {
@@ -192,31 +186,25 @@ public class Labyrinth {
 
 	public Iterable<Edge<Walkway>> constructPath(Vertex<RoomCoordinate> u, Vertex<RoomCoordinate> v, HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest){
 		Vertex<RoomCoordinate> end = v;
-		DoublyLinkedList<Edge<Walkway>> temp = new DoublyLinkedList<>();
+		DoublyLinkedList<Edge<Walkway>> temp = new DoublyLinkedList<Edge<Walkway>>();
 		while(end != u) {
 			Edge<Walkway> E = forest.get(end);
 			temp.addFirst(E);
 			end = mGraph.opposite(end, E);
-		}
+			}
 		return temp;
 	}
 
 
 	/**
-	 * Complete the dfsPath function by implementing a Breadth First Search
-	 * algorithm to find a path from start to end. At each vertex, the adjacent
-	 * edges shall be searched in the order of NORTH, EAST, SOURTH and WEST. 
-	 * @param start an RoomCoordinate object represents the start location, 
-	 * 				this object does not exist in the graph 
-	 * @param end  an RoomCoordinate object represents the start location, 
-	 * 				this object does not exist in the graph 
-	 * @return 		Return the sequence of edges traversed in order to get from the
-	 * 				start to the finish locations. If there is
-	 * 				NO path, do NOT return null. Return an empty sequence. 
+	 * Finds a path from one point to the other using a breadth-first algorithm   
+	 * 
+	 * TCJ: 
+	 * Each vertex is visited once, each edge is scanned once
 	 */
+	@TimeComplexity("O(n + m)")
 	public Iterable<Edge<Walkway>> bfsPath(RoomCoordinate start, RoomCoordinate end) {
-		// #TODO: Complete and correct bfsPath()
-		/* #TODO: TCJ */
+		
 		HashMap<Vertex<RoomCoordinate>, Boolean> visited = new HashMap<>((int) (mGraph.numVertices() * 1.2)); 
 		HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest = new HashMap<>((int) (mGraph.numVertices() * 1.2));
 		Vertex<RoomCoordinate> v = null;
@@ -231,10 +219,11 @@ public class Labyrinth {
 				z = temp;
 			}
 		}
-		
+
 		return BFSPath(v, z, visited, forest);		
 	}
 
+	@TimeComplexity("O(n + m)")
 	public Iterable<Edge<Walkway>> BFSPath(Vertex<RoomCoordinate> v, Vertex<RoomCoordinate> z, HashMap<Vertex<RoomCoordinate>, Boolean> visited, HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest) {
 		if(v == z) {
 			return null;
@@ -280,23 +269,19 @@ public class Labyrinth {
 	}
 
 	/**
-	 * Complete the shortestPath function by implementing Dijkstra's
-	 * algorithm to find a path from start to end. At each vertex, the adjacent
-	 * edges shall be searched in the order of NORTH, EAST, SOURTH and WEST. 
-	 * @param start an RoomCoordinate object represents the start location, 
-	 * 				this object does not exist in the graph 
-	 * @param end  an RoomCoordinate object represents the start location, 
-	 * 				this object does not exist in the graph 
-	 * @return 		Return the sequence of edges traversed in order to get from the
-	 * 				start to the finish locations. If there is
-	 * 				NO path, do NOT return null. Return an empty sequence. 
+	 * Finds the shortest path between two points
+	 * 
+	 * TCJ:
+	 *  the method visits each vertex and edge once for each minimum edge
 	 */
+	@TimeComplexity("O((n + m)logn)")
 	public Iterable<Edge<Walkway>> shortestPath(RoomCoordinate start, RoomCoordinate end) {
-		HashMap<Vertex<RoomCoordinate>, Integer> d = new HashMap<>();
+		HashMap<Vertex<RoomCoordinate>, Integer> d = new HashMap<>((int) (mGraph.numVertices() * 1.2));
 		HeapPQ<Integer, Vertex<RoomCoordinate>> pq = new HeapPQ<>();
-		HashMap<Vertex<RoomCoordinate>, Entry<Integer, Vertex<RoomCoordinate>>> PQTokens = new HashMap<>();
-		HashMap<Vertex<RoomCoordinate>, Integer> cloud = new HashMap<>();
-		HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest = new HashMap<>();
+		HashMap<Vertex<RoomCoordinate>, Entry<Integer, Vertex<RoomCoordinate>>> PQTokens = new HashMap<>((int) (mGraph.numVertices() * 1.2));
+		HashMap<Vertex<RoomCoordinate>, Integer> cloud = new HashMap<>((int) (mGraph.numVertices() * 1.2));
+		HashMap<Vertex<RoomCoordinate>, Edge<Walkway>> forest = new HashMap<>((int) (mGraph.numVertices() * 1.2));
+
 		Vertex<RoomCoordinate> v = null;
 		Vertex<RoomCoordinate> z = null;
 		for(Vertex<RoomCoordinate> e: mGraph.vertices()) {
@@ -308,7 +293,7 @@ public class Labyrinth {
 				z = temp;
 			}
 		}
-		
+
 		for(Vertex<RoomCoordinate> u: mGraph.vertices()) {
 			if(u == v) {
 				d.put(u, 0);
@@ -321,7 +306,7 @@ public class Labyrinth {
 			Entry<Integer, Vertex<RoomCoordinate>> entry = pq.removeMin();
 			int key = entry.getKey();
 			Vertex<RoomCoordinate> u = entry.getValue();
-			if(u == z) {
+			if(u.equals(z)) {
 				break;
 			}
 			cloud.put(u, key);
@@ -329,37 +314,35 @@ public class Labyrinth {
 			for(Edge<Walkway> e: mGraph.outgoingEdges(u)) {
 				Vertex<RoomCoordinate> w = mGraph.opposite(u, e);
 				if(cloud.get(w) == null) {
-					int newDistance = d.get(u) + e.getElement().getDistance();
+					int newDistance = key + e.getElement().getDistance();
 					if(d.get(w) > newDistance) {
 						d.put(w, newDistance);
 						forest.put(w, e);
-						pq.replaceKey(PQTokens.get(v), newDistance);
+						pq.replaceKey(PQTokens.get(w), newDistance);
+
 					}
 				}
 			}
 		}
-		
 		return constructPath(v, z, forest);
 	}
-	
+
 	/*
 	 * Complete the totalPathDistance function, which calculates how far the
 	 * given path traverses.
 	 */
 	public static double totalPathDistance(Iterable<Edge<Walkway>> path) {
-		// # TODO: Complete totalPathDistance function
 		int size = 0;
 		for(Edge<Walkway> e: path) {
 			size += e.getElement().getDistance();
 		}
-		
+
 		return size;
 	}
 
 	public static void main(String[] aArguments) {
 		Labyrinth lLabyrinth = new Labyrinth("SmallLabyrinth.txt");
 
-		// TODO: Testing
 	}
 
 }
